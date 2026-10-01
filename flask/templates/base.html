@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Pasale Dai Admin{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  {% if session.get('is_authenticated') %}
+  <header class="site-nav">
+    <div class="shell-container site-nav-inner">
+      <a href="{{ url_for('dashboard') }}" class="brand-wrapper">
+        <span class="brand-badge">PD</span>
+        <span class="brand-title">Pasale Dai</span>
+        <span class="brand-tag">Ops</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="{{ url_for('dashboard') }}" class="nav-item {% if current_path == '/' %}active{% endif %}">Orders</a>
+        <a href="{{ url_for('payments_ledger') }}" class="nav-item {% if current_path == '/payments' %}active{% endif %}">Payments</a>
+        <a href="{{ url_for('inventory') }}" class="nav-item {% if current_path == '/inventory' %}active{% endif %}">Inventory</a>
+      </nav>
+
+      <div class="nav-actions">
+        <span class="user-badge mono">
+          <span class="user-status-dot"></span>
+          {{ session.get('admin_user') }}
+        </span>
+        <a href="{{ url_for('logout') }}" class="btn btn-sm">Log out</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="metrics-bar">
+    <div class="shell-container metrics-grid">
+      <div class="metric-card">
+        <div class="metric-top">
+          <span class="metric-label">Gross Revenue</span>
+          <svg class="metric-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <div class="metric-value mono">Rs. {{ "%.2f"|format(kpi.gross_revenue) }}</div>
+      </div>
+
+      <div class="metric-card {% if kpi.pending_fulfillment > 0 %}warning-state{% endif %}">
+        <div class="metric-top">
+          <span class="metric-label">Pending Fulfillment</span>
+          <svg class="metric-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <div class="metric-value mono">{{ kpi.pending_fulfillment }}</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-top">
+          <span class="metric-label">Completed Orders</span>
+          <svg class="metric-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <div class="metric-value mono">{{ kpi.completed_orders }}</div>
+      </div>
+
+      <div class="metric-card {% if kpi.low_stock_count > 0 %}danger-state{% endif %}">
+        <div class="metric-top">
+          <span class="metric-label">Low Stock Alerts (&lt; 5)</span>
+          <svg class="metric-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        </div>
+        <div class="metric-value mono">{{ kpi.low_stock_count }}</div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <main class="main-content">
+    <div class="shell-container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-messages">
+            {% for category, msg in messages %}
+              <div class="flash-message mono">{{ msg }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="orderDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <span class="pill-badge pill-muted mono" style="font-size:10px;">INSPECTOR</span>
+        <div class="mono" style="font-weight:700; font-size:14px;" id="drawerOrderNumber">Order Detail</div>
+      </div>
+      <button type="button" class="btn btn-sm" id="drawerCloseBtn">&times;</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
