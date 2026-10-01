@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Payments Audit Ledger &mdash; Pasale Dai Admin{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px;">
+  <div>
+    <h1 style="font-size:18px; font-weight:700; letter-spacing:-0.02em; color:var(--text-main);">eSewa Transaction Ledger</h1>
+    <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">Audit trail of electronic payments, callbacks, and verification timestamps</p>
+  </div>
+  <div class="mono" style="font-size:12px; color:var(--text-muted);">
+    Total Entries: <span style="font-weight:700; color:var(--text-main);">{{ payments|length }}</span>
+  </div>
+</div>
+
+<div class="table-panel">
+  <table class="order-table">
+    <thead>
+      <tr>
+        <th>Transaction ID</th>
+        <th>Order Ref</th>
+        <th>Customer</th>
+        <th>Gateway Code</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Verification Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for payment in payments %}
+      <tr>
+        <td class="mono" style="font-weight:600; font-size:12px;">
+          {{ payment.transaction_id or '&mdash;'|safe }}
+        </td>
+        <td class="mono">
+          {% if payment.order_id %}
+            <a href="#" class="order-link order-trigger" data-order-id="{{ payment.order_id }}">
+              {{ payment.order_number or ('#' ~ payment.order_id) }}
+            </a>
+          {% else %}
+            <span style="color:var(--text-faint);">&mdash;</span>
+          {% endif %}
+        </td>
+        <td>
+          <span class="mono" style="font-size:12px; color:var(--text-main);">@{{ payment.discord_username or 'guest' }}</span>
+        </td>
+        <td class="mono" style="font-size:12px; color:var(--text-muted);">
+          {{ payment.product_code or '&mdash;'|safe }}
+        </td>
+        <td class="mono" style="font-weight:700; font-size:13px; color:var(--text-main);">
+          Rs. {{ "%.2f"|format(payment.amount) }}
+        </td>
+        <td>
+          {% if payment.status == 'success' %}
+            <span class="pill-badge pill-success">Success</span>
+          {% elif payment.status == 'pending' %}
+            <span class="pill-badge pill-pending">Pending</span>
+          {% else %}
+            <span class="pill-badge pill-muted">{{ payment.status|upper }}</span>
+          {% endif %}
+        </td>
+        <td class="mono" style="font-size:12px; color:var(--text-muted);">
+          {{ (payment.verified_at or payment.created_at)|format_dt }}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7" style="text-align:center; padding:48px; color:var(--text-muted);">
+          No payment transaction records found in ledger.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
