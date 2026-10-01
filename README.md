@@ -4,7 +4,7 @@
 > commerce, eSewa payments, automated invoicing, and lightweight
 > operations management.**
 
-Pasale Dai Collections is an autonomous e-commerce platform designed for
+Pasale Dai  is an autonomous e-commerce platform designed for
 small-to-medium retail businesses in Nepal. Customers can browse
 products, ask questions, build multi-item carts, complete payment
 through **eSewa ePay v2**, and receive their invoice directly through
