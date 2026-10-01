@@ -75,6 +75,16 @@ class OrderService:
 
         customer = self.customer_repo.get_or_create(discord_user_id, discord_username)
 
+        # Cancel any previous uncompleted checkouts for this customer so ghost duplicate orders don't pile up
+        self.conn.cursor().execute(
+            """
+            UPDATE orders 
+            SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
+            WHERE customer_id = ? AND status IN ('pending', 'payment_pending');
+            """,
+            (customer.id,)
+        )
+
         validated_items = []
         grand_total = 0.0
 
