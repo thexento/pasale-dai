@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Orders & Delivery Operations &mdash; Pasale Dai Admin{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <div class="status-pills">
+    {% for status in valid_statuses %}
+      <a href="{{ url_for('dashboard', status=status, q=search_query) }}" 
+         class="status-pill {% if current_status == status %}active{% endif %}">
+        {{ status|replace('_', ' ')|capitalize }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <form method="GET" action="{{ url_for('dashboard') }}" class="search-field">
+    <input type="hidden" name="status" value="{{ current_status }}">
+    <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
+    <input type="text" name="q" placeholder="Filter by ref, customer, phone..." value="{{ search_query }}">
+  </form>
+</div>
+
+<div class="table-panel">
+  <table class="order-table">
+    <thead>
+      <tr>
+        <th>Reference</th>
+        <th>Created</th>
+        <th>Customer</th>
+        <th>Purchased Cart Items</th>
+        <th>Total</th>
+        <th>Payment</th>
+        <th>Fulfillment</th>
+        <th>Delivery Address</th>
+        <th>Tax Invoice</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td>
+          <a href="#" class="order-link order-trigger" data-order-id="{{ order.id }}">
+            {{ order.order_number }}
+          </a>
+        </td>
+        <td class="mono" style="font-size:12px; color:var(--text-muted);">
+          {{ order.created_at|format_dt }}
+        </td>
+        <td>
+          <div style="font-weight:600; color:var(--text-main);">{{ order.customer_name or 'Store Customer' }}</div>
+          <div class="mono" style="font-size:11px; color:var(--text-muted);">@{{ order.discord_username or 'guest' }}</div>
+        </td>
+        <td>
+          <div class="item-tag-list">
+            {% if order.purchased_items_summary and order.purchased_items_summary != 'No items listed' %}
+              {% for chunk in order.purchased_items_summary.split(', ') %}
+                <span class="item-chip">
+                  <span class="item-qty">&bull;</span>
+                  <span>{{ chunk }}</span>
+                </span>
+              {% endfor %}
+            {% else %}
+              <span style="color:var(--text-faint); font-size:12px;">No items attached</span>
+            {% endif %}
+          </div>
+        </td>
+        <td class="mono" style="font-weight:700; font-size:13px; color:var(--text-main);">
+          Rs. {{ "%.2f"|format(order.total_amount) }}
+        </td>
+        <td>
+          {% if order.payment_status == 'success' %}
+            <span class="pill-badge pill-success">Verified</span>
+          {% elif order.payment_status == 'pending' %}
+            <span class="pill-badge pill-pending">Pending</span>
+          {% else %}
+            <span class="pill-badge pill-muted">{{ order.payment_status or 'Unpaid' }}</span>
+          {% endif %}
+        </td>
+        <td>
+          <select class="status-dropdown status-change-select" 
+                  data-order-id="{{ order.id }}" 
+                  data-original-status="{{ order.order_status }}">
+            {% for s in ['pending', 'payment_pending', 'paid', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'] %}
+              <option value="{{ s }}" {% if order.order_status == s %}selected{% endif %}>
+                {{ s|upper }}
+              </option>
+            {% endfor %}
+          </select>
+        </td>
+        <td style="font-size:12px;">
+          {% if order.delivery_phone %}
+            <div class="mono" style="font-weight:600; color:var(--text-main); font-size:11px;">{{ order.delivery_phone }}</div>
+          {% endif %}
+          <div style="color:var(--text-muted); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            {{ order.delivery_address or 'Awaiting location details' }}
+          </div>
+          {% if order.delivery_location_link %}
+            <a href="{{ order.delivery_location_link }}" target="_blank" rel="noopener noreferrer" style="font-size:11px; text-decoration:none; color:var(--text-main); font-weight:600;">Google Pin &rarr;</a>
+          {% endif %}
+        </td>
+        <td>
+          {% if order.invoice_file %}
+            {% set inv_filename = order.invoice_file.split('/')[-1] %}
+            <a href="{{ url_for('view_invoice', filename=inv_filename) }}" target="_blank" class="btn btn-pdf">PDF</a>
+          {% else %}
+            <span style="font-size:11px; color:var(--text-faint); font-family:var(--font-mono);">&mdash;</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9" style="text-align:center; padding:48px; color:var(--text-muted);">
+          No customer orders found matching the selected filter.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
