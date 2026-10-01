@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout &mdash; {{ order.order_number }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 0%, #f1f5f9 0%, var(--bg-app) 75%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .checkout-container {
+      width: 100%;
+      max-width: 520px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .checkout-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .checkout-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .line-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 13px;
+    }
+    .esewa-btn {
+      background: #60bb46;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: none;
+      width: 100%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.15s ease;
+    }
+    .esewa-btn:hover {
+      background: #52a43b;
+    }
+  </style>
+</head>
+<body>
+  <div class="checkout-container">
+    <div class="checkout-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="brand-badge">PD</span>
+        <span class="brand-title">Pasale Dai Checkout</span>
+      </div>
+      <span class="pill-badge pill-pending mono">{{ order.order_number }}</span>
+    </div>
+
+    <div class="checkout-body">
+      <div>
+        <div class="drawer-section-title">Order Items</div>
+        {% for item in items %}
+        <div class="line-item-row">
+          <div>
+            <div style="font-weight:600; color:var(--text-main);">{{ item.product_name }}</div>
+            <div class="mono" style="font-size:11px; color:var(--text-muted);">Qty: {{ item.quantity }} &times; Rs. {{ "%.2f"|format(item.unit_price) }}</div>
+          </div>
+          <div class="mono" style="font-weight:600;">Rs. {{ "%.2f"|format(item.total_price) }}</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div style="background:var(--bg-subtle); padding:16px; border-radius:var(--radius-md); border:1px solid var(--border-default);">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:13px; color:var(--text-muted);">
+          <span>Subtotal</span>
+          <span class="mono">Rs. {{ "%.2f"|format(order.total_amount) }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:13px; color:var(--text-muted);">
+          <span>Delivery Charge</span>
+          <span class="mono" style="color:var(--status-emerald);">FREE</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-weight:700; font-size:16px; color:var(--text-main); border-top:1px solid var(--border-default); padding-top:8px;">
+          <span>Grand Total</span>
+          <span class="mono">Rs. {{ "%.2f"|format(order.total_amount) }}</span>
+        </div>
+      </div>
+
+      <!-- eSewa EPAY v2 Form -->
+      <form action="{{ esewa.esewa_url }}" method="POST">
+        <input type="hidden" name="amount" value="{{ esewa.amount }}">
+        <input type="hidden" name="tax_amount" value="{{ esewa.tax_amount }}">
+        <input type="hidden" name="total_amount" value="{{ esewa.total_amount }}">
+        <input type="hidden" name="transaction_uuid" value="{{ esewa.transaction_uuid }}">
+        <input type="hidden" name="product_code" value="{{ esewa.product_code }}">
+        <input type="hidden" name="product_service_charge" value="{{ esewa.product_service_charge }}">
+        <input type="hidden" name="product_delivery_charge" value="{{ esewa.product_delivery_charge }}">
+        <input type="hidden" name="success_url" value="{{ esewa.success_url }}">
+        <input type="hidden" name="failure_url" value="{{ esewa.failure_url }}">
+        <input type="hidden" name="signed_field_names" value="{{ esewa.signed_field_names }}">
+        <input type="hidden" name="signature" value="{{ esewa.signature }}">
+
+        <button type="submit" class="esewa-btn">
+          Pay with eSewa &rarr;
+        </button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
