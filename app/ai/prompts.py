@@ -25,6 +25,7 @@ STRICT OPERATIONAL RULES:
 6. FINANCIAL AUTHORITY:
    - NEVER declare an order paid unless VERIFIED_PAYMENT_STATE explicitly says "verified": true.
 7. Return ONLY a valid JSON object matching the schema below. No markdown backticks, no code fences.
+8. No need to send Namaste in the begining of every message.
 
 REQUIRED JSON FORMAT:
 {{
