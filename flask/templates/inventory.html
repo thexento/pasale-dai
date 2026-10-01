@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory & Stock Control &mdash; Pasale Dai Admin{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px;">
+  <div>
+    <h1 style="font-size:18px; font-weight:700; letter-spacing:-0.02em; color:var(--text-main);">Inventory Catalog</h1>
+    <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">Real-time SKU catalog and storefront visibility status</p>
+  </div>
+  <div class="mono" style="font-size:12px; color:var(--text-muted);">
+    Total Items: <span style="font-weight:700; color:var(--text-main);">{{ products|length }}</span>
+  </div>
+</div>
+
+<div class="table-panel">
+  <table class="order-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>SKU</th>
+        <th>Product Name & Description</th>
+        <th>Unit Price</th>
+        <th>In Stock</th>
+        <th>Adjust Stock</th>
+        <th>Store Status</th>
+        <th>Last Updated</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in products %}
+      <tr>
+        <td class="mono" style="color:var(--text-faint); font-size:11px;">
+          #{{ item.id }}
+        </td>
+        <td class="mono" style="font-weight:600; font-size:12px; color:var(--text-main);">
+          {{ item.sku }}
+        </td>
+        <td>
+          <div style="font-weight:600; color:var(--text-main); font-size:13px;">{{ item.name }}</div>
+          <div style="font-size:11px; color:var(--text-muted); max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px;">
+            {{ item.description or 'No catalog description provided.' }}
+          </div>
+        </td>
+        <td class="mono" style="font-weight:600; font-size:13px;">
+          Rs. {{ "%.2f"|format(item.price) }}
+        </td>
+        <td class="mono">
+          {% if item.stock < 5 %}
+            <span class="pill-badge pill-pending" style="font-size:11px;">{{ item.stock }} units</span>
+          {% else %}
+            <span style="font-weight:700; font-size:13px; color:var(--text-main);">{{ item.stock }}</span>
+          {% endif %}
+        </td>
+        <td>
+          <form class="stock-form" data-product-id="{{ item.id }}" style="display:flex; align-items:center; gap:6px;">
+            <input type="number" min="0" class="mono stock-input" value="{{ item.stock }}" 
+                   style="width:60px; padding:3px 6px; font-size:12px; border:1px solid var(--border-default); border-radius:var(--radius-sm); outline:none;">
+            <button type="submit" class="btn btn-sm btn-dark">Update</button>
+          </form>
+        </td>
+        <td>
+          <button type="button" 
+                  class="btn btn-sm active-toggle-btn {% if item.active == 1 %}btn-dark{% endif %}" 
+                  data-product-id="{{ item.id }}" 
+                  data-active="{{ item.active }}"
+                  style="min-width:76px;">
+            {{ 'Active' if item.active == 1 else 'Archived' }}
+          </button>
+        </td>
+        <td class="mono" style="font-size:11px; color:var(--text-muted);">
+          {{ item.updated_at|format_dt }}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="8" style="text-align:center; padding:48px; color:var(--text-muted);">
+          No products currently registered in database catalog.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
