@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Status &mdash; Pasale Dai</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body style="display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;">
+  <div style="text-align:center; max-width:440px; background:#fff; padding:36px; border-radius:16px; border:1px solid var(--border-default); box-shadow:var(--shadow-md);">
+    {% if success %}
+      <span class="pill-badge pill-success mono" style="margin-bottom:12px;">PAYMENT VERIFIED</span>
+      <h1 style="font-size:20px; font-weight:700; margin-top:8px;">Thank You for Your Order!</h1>
+      <p style="font-size:13px; color:var(--text-muted); margin:10px 0 20px;">
+        Your eSewa payment was successfully processed. We have notified our delivery team on Discord.
+      </p>
+    {% else %}
+      <span class="pill-badge pill-pending mono" style="margin-bottom:12px;">TRANSACTION FAILED</span>
+      <h1 style="font-size:20px; font-weight:700; margin-top:8px;">Payment Incomplete</h1>
+      <p style="font-size:13px; color:var(--text-muted); margin:10px 0 20px;">{{ error or 'Transaction was cancelled.' }}</p>
+    {% endif %}
+    <a href="/" class="btn btn-dark" style="width:100%;">Return to Home</a>
+  </div>
+</body>
+</html>
